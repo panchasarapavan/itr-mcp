@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "itr-agent"
+version = "0.1.0"
+description = "Open-source MCP server for Indian Income Tax Return filing. Runs locally."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+authors = [{ name = "Panchasara Pavan Kumar" }]
+dependencies = [
+    "mcp>=2.3,<3",
+    "pydantic>=2.7,<3",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+itr-agent = "itr_agent.server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/itr_agent"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
