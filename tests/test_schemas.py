@@ -59,6 +59,11 @@ def test_form16_assessment_year_format_enforced():
 
 
 def test_ais_defaults_to_empty_lists():
-    ais = AISData()
+    ais = AISData(assessment_year="2026-27")
     assert ais.salary_income == []
     assert ais.reported_transactions == []
+
+
+def test_ais_requires_assessment_year():
+    with pytest.raises(ValidationError):
+        AISData()

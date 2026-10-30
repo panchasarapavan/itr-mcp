@@ -7,7 +7,7 @@ being silently dropped.
 
 from datetime import date
 from decimal import Decimal
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -15,6 +15,7 @@ Exchange = Literal["NSE", "BSE", "NYSE", "NASDAQ"]
 AssetClass = Literal["EQUITY", "DEBT_MF", "EQUITY_MF", "FNO", "FOREIGN_EQUITY"]
 Currency = Literal["INR", "USD"]
 TradeType = Literal["BUY", "SELL"]
+AssessmentYear = Annotated[str, Field(pattern=r"^\d{4}-\d{2}$", examples=["2026-27"])]
 
 
 class _Strict(BaseModel):
@@ -88,6 +89,7 @@ class ReportedTransaction(_Strict):
 class AISData(_Strict):
     """Annual Information Statement. Treated as ground truth for pre-fill."""
 
+    assessment_year: AssessmentYear
     salary_income: list[SalaryEntry] = Field(default_factory=list)
     interest_income: list[InterestEntry] = Field(default_factory=list)
     dividend_income: list[DividendEntry] = Field(default_factory=list)
@@ -98,13 +100,21 @@ class AISData(_Strict):
     reported_transactions: list[ReportedTransaction] = Field(default_factory=list)
 
 
-class Form16Data(_Strict):
-    """Form 16 Part A (TDS) and Part B (salary breakup and income)."""
+class Form26ASData(_Strict):
+    """Form 26AS tax credit statement. Lists TDS and TCS credits by deductor."""
 
+    assessment_year: AssessmentYear
+    tds_credits: list[TDSCredit] = Field(default_factory=list)
+    tcs_credits: list[TDSCredit] = Field(default_factory=list)
+
+
+class Form16Data(_Strict):
+    """Form 16 Part A (TDS) and Part B (salary breakup and income). One per employer."""
+
+    assessment_year: AssessmentYear
     employer_name: str
     employer_tan: str
     employee_pan: str | None = None
-    assessment_year: str = Field(pattern=r"^\d{4}-\d{2}$", examples=["2026-27"])
 
     gross_salary: Decimal
     perquisites: Decimal = Decimal("0")

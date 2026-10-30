@@ -6,18 +6,25 @@ and others). No backend, and no document leaves your device.
 
 ## Status
 
-Phase 0 (foundation) is in place:
+Phase 0 (foundation): strict schemas, the trade validation gate, and the MCP
+server skeleton.
 
-- `schemas.py`: strict Pydantic contracts (`NormalizedTrade`, `AISData`,
-  `Form16Data`, `ReconciliationResult`). Unknown fields are rejected.
-- `validation.py`: the Layer 2 gate. It checks quantity and price positivity,
-  ISIN format and check digit, trade date, currency against exchange, asset
-  class against exchange, sell-versus-holding, and duplicates. Errors block a
-  batch. Warnings are advisory.
-- `server.py`: the MCP server with all 14 tools registered. `ingest_trades` is
-  live. The rest return `not_implemented` until their phase lands.
+Phase 1 (AIS and missing documents) is in place:
 
-Engines (capital gains, tax, reconciliation, ITR JSON) come in Phases 1 to 3.
+- **Ingest and store.** `ingest_ais`, `ingest_26as`, `ingest_form16`, and
+  `ingest_trades` take structured data that the AI has read from the user's
+  file. The server validates it and stores it under `ITR_AGENT_HOME` (default
+  `~/.itr-agent`), one folder per assessment year.
+- **Show.** `show_ais` renders the AIS as markdown, with Indian digit grouping
+  and TDS totals.
+- **Find what's missing.** `get_document_checklist` works out which supporting
+  documents the AIS implies (26AS, Form 16 per employer, broker P&L) and
+  attaches a download guide to each missing one. Guides live in
+  `src/itr_agent/guides_data/`. They are drafted and not yet checked against
+  the live portals.
+
+Still `not_implemented`: reconciliation, tax and capital-gains engines, ITR
+JSON, and currency conversion. These are Phases 2 to 3.
 
 ## Development
 
